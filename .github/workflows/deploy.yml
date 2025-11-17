@@ -1,0 +1,52 @@
+# Nome do fluxo
+name: Deploy Flutter Web no GitHub Pages
+
+# 1. Gatilho (Trigger)
+# Isso roda automaticamente quando você der 'push' na branch 'main'
+on:
+  push:
+    branches:
+      - main # (ou 'master' se for o seu caso)
+
+jobs:
+  build_and_deploy:
+    # Usa uma máquina virtual Linux para rodar os comandos
+    runs-on: ubuntu-latest
+
+    steps:
+      # 2. Baixa o seu código do repositório para a máquina virtual
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 3. Instala a versão estável do Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. Pega o nome do seu repositório (ex: "rastreio_univasf")
+      # Isso é crucial para que o site encontre os assets (JSON, fontes)
+      - name: Get repository name
+        run: echo "repo_name=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)" >> $GITHUB_ENV
+
+      # 5. Instala as dependências do app (shared_preferences, etc.)
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 6. Compila o aplicativo para Web (O PASSO MAIS IMPORTANTE)
+      - name: Build Flutter Web
+        run: |
+          # Compila em modo 'release'
+          # A flag '--base-href' ajusta os caminhos dos arquivos
+          # para funcionar no GitHub Pages
+          flutter build web --release \
+            --base-href /${{ env.repo_name }}/
+      
+      # 7. Faz o deploy (publica) da pasta 'build/web'
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          # Token automático para permitir que a Action publique no seu repo
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # O 'publish_dir' é a pasta que o Flutter acabou de criar
+          publish_dir: ./build/web
