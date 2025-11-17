@@ -2,51 +2,64 @@
 name: Deploy Flutter Web no GitHub Pages
 
 # 1. Gatilho (Trigger)
-# Isso roda automaticamente quando você der 'push' na branch 'main'
+# Roda em push para 'main' ou 'master'
 on:
   push:
     branches:
-      - main # (ou 'master' se for o seu caso)
+      - main
+      - master
+
+# 2. Permissões
+# ESSENCIAL: Concede permissões para a action poder publicar
+permissions:
+  contents: read
+  pages: write      # Permite escrever na GH Pages
+  id-token: write # Permite autenticar a action
 
 jobs:
-  build_and_deploy:
-    # Usa uma máquina virtual Linux para rodar os comandos
+  # Job 1: Compilar o aplicativo
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      # 2. Baixa o seu código do repositório para a máquina virtual
-      - name: Checkout
+      - name: Checkout (Baixar o código)
         uses: actions/checkout@v4
 
-      # 3. Instala a versão estável do Flutter
-      - name: Setup Flutter
+      - name: Setup Flutter (Instalar o Flutter)
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.x' # Trava na versão 3.x para estabilidade
           channel: 'stable'
+          cache: true # Adiciona cache para builds futuros mais rápidos
 
-      # 4. Pega o nome do seu repositório (ex: "rastreio_univasf")
-      # Isso é crucial para que o site encontre os assets (JSON, fontes)
-      - name: Get repository name
+      - name: Get repository name (Pegar nome do repo)
         run: echo "repo_name=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)" >> $GITHUB_ENV
 
-      # 5. Instala as dependências do app (shared_preferences, etc.)
-      - name: Install dependencies
+      - name: Install dependencies (Instalar pacotes)
         run: flutter pub get
 
-      # 6. Compila o aplicativo para Web (O PASSO MAIS IMPORTANTE)
-      - name: Build Flutter Web
+      - name: Build Flutter Web (Compilar o app)
         run: |
-          # Compila em modo 'release'
-          # A flag '--base-href' ajusta os caminhos dos arquivos
-          # para funcionar no GitHub Pages
           flutter build web --release \
             --base-href /${{ env.repo_name }}/
       
-      # 7. Faz o deploy (publica) da pasta 'build/web'
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      # 7. Salva a pasta 'build/web' como um "artefato" para o próximo job
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          # Token automático para permitir que a Action publique no seu repo
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # O 'publish_dir' é a pasta que o Flutter acabou de criar
-          publish_dir: ./build/web
+          path: ./build/web
+
+  # Job 2: Fazer o deploy do artefato compilado
+  deploy:
+    needs: build # Este job só roda DEPOIS que o 'build' terminar
+    runs-on: ubuntu-latest
+    
+    # Define o ambiente de deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # 8. Ação oficial de deploy
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
