@@ -224,10 +224,10 @@ class GradeColors extends ThemeExtension<GradeColors> {
 
 // ---- NOSSAS CORES (MODO CLARO) ----
 const lightGradeColors = GradeColors(
-  gradeA: Color(0xFF22C55E),
-  gradeASoft: Color(0xFFF0FDF4), 
-  gradeB: Color(0xFFF59E0B), 
-  gradeBSoft: Color(0xFFFFFBEB), 
+  gradeA: Color(0xFF60A5FA), 
+  gradeASoft: Color(0xFFEFF6FF), 
+  gradeB: Color(0xFF22C55E), 
+  gradeBSoft: Color(0xFFF0FDF4),
   gradeC: Color(0xFFEAB308), 
   gradeCSoft: Color(0xFFFFFBEB), 
   gradeD: Color(0xFFEF4444), 
@@ -238,9 +238,9 @@ const lightGradeColors = GradeColors(
 
 // ---- NOSSAS CORES (MODO ESCURO - "MAIS FRACAS") ----
 const darkGradeColors = GradeColors(
-  gradeA: Color(0xFF166534), 
-  gradeASoft: Color(0xFF1F2937), 
-  gradeB: Color(0xFF92400E), 
+  gradeA: Color(0xFF1D4ED8),
+  gradeASoft: Color(0xFF1F2937),
+  gradeB: Color(0xFF166534),
   gradeBSoft: Color(0xFF1F2937),
   gradeC: Color(0xFF854D0E), 
   gradeCSoft: Color(0xFF1F2937),
