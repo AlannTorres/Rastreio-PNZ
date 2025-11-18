@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   int? _selectedHeight;
   String? _selectedPregnant;
   String? _selectedSmoker;
+  String? _selectedSexuallyActive;
   String? _selectedGender;
   String? _selectedGrade;
 
@@ -94,7 +95,6 @@ class _HomePageState extends State<HomePage> {
     
     setState(() {}); 
   }
-
 
   @override
   void dispose() {
@@ -170,6 +170,21 @@ class _HomePageState extends State<HomePage> {
             !text.contains('fumante') && !text.contains('tabaco') &&
             !riskText.contains('smok') && !riskText.contains('tobacco') &&
             !riskText.contains('fumante') && !riskText.contains('tabaco')) {
+          return false;
+        }
+      }
+
+      if (_selectedSexuallyActive == 'Sim') {
+        final title = (rec['title'] as String? ?? '').toLowerCase();
+        final text = (rec['text'] as String? ?? '').toLowerCase();
+        final riskText = (rec['riskText'] as String? ?? '').toLowerCase();
+        
+        if (!title.contains('sexual') && !title.contains('sexually active') &&
+            !title.contains('sexualmente ativo') && !title.contains('dst') &&
+            !text.contains('sexual') && !text.contains('sexually active') &&
+            !text.contains('sexualmente ativo') && !text.contains('dst') &&
+            !riskText.contains('sexual') && !riskText.contains('sexually active') &&
+            !riskText.contains('sexualmente ativo') && !riskText.contains('dst')) {
           return false;
         }
       }
@@ -468,10 +483,10 @@ class _HomePageState extends State<HomePage> {
         _buildFilterDropdown(
           label: 'Grávida?',
           value: _selectedPregnant,
-          items: ['Não', 'Sim'],
+          items: ['Todos', 'Não', 'Sim'], 
           onChanged: (value) {
             setState(() {
-              _selectedPregnant = value;
+              _selectedPregnant = value == 'Todos' ? null : value;
             });
           },
         ),
@@ -480,10 +495,22 @@ class _HomePageState extends State<HomePage> {
         _buildFilterDropdown(
           label: 'Fumante?',
           value: _selectedSmoker,
-          items: ['Não', 'Sim'],
+          items: ['Todos', 'Não', 'Sim'],
           onChanged: (value) {
             setState(() {
-              _selectedSmoker = value;
+              _selectedSmoker = value == 'Todos' ? null : value;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+
+        _buildFilterDropdown(
+          label: 'Sexualmente Ativo?',
+          value: _selectedSexuallyActive,
+          items: ['Todos', 'Não', 'Sim'],
+          onChanged: (value) {
+            setState(() {
+              _selectedSexuallyActive = value == 'Todos' ? null : value;
             });
           },
         ),
@@ -559,6 +586,7 @@ class _HomePageState extends State<HomePage> {
                 _selectedGender = null;
                 _selectedPregnant = null;
                 _selectedSmoker = null;
+                _selectedSexuallyActive = null; // Limpar novo filtro
                 _selectedGrade = null;
               });
               ScaffoldMessenger.of(context).showSnackBar(
@@ -646,7 +674,7 @@ class _HomePageState extends State<HomePage> {
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-              hint: const Text('Selecione'),
+              hint: Text(items[0]), // Mostra "Todos" como hint
               icon: const Icon(Icons.arrow_drop_down, size: 24),
               items: items.map((String item) {
                 return DropdownMenuItem<String>(
@@ -900,7 +928,6 @@ class _HomePageState extends State<HomePage> {
 
   /// ========================================
   /// MÉTODOS AUXILIARES
-  /// ========================================
   Color _getGradeStrongColor(GradeColors colors, String grade) {
     switch (grade.toUpperCase()) {
       case 'A': return colors.gradeA;
@@ -939,7 +966,7 @@ class _HomePageState extends State<HomePage> {
 
   /// ========================================
   /// MÉTODOS DO AVISO INICIAL
-  /// ========================================
+
   Future<void> _checkAndShowDisclaimer() async {
     bool seen = await FavoriteService.hasSeenDisclaimer();
     
