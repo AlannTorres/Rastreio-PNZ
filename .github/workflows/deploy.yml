@@ -1,4 +1,3 @@
-# Nome do fluxo
 name: Deploy Flutter Web no GitHub Pages
 
 # 1. Gatilho (Trigger)
@@ -13,7 +12,7 @@ on:
 # ESSENCIAL: Concede permissões para a action poder publicar
 permissions:
   contents: read
-  pages: write      # Permite escrever na GH Pages
+  pages: write # Permite escrever na GH Pages
   id-token: write # Permite autenticar a action
 
 jobs:
